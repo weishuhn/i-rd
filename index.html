@@ -1,0 +1,1408 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>body{margin:0}[hidden]{display:none!important}</style>
+<title>2326 I Road Deck Study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#E8EAE5; --panel:#F4F5F1; --field:#FFFFFF; --ink:#1E2326; --muted:#5F6866; --line:#CBD0C8;
+  --accent:#9E5226; --accent-soft:#F1E1D5; --accent-ink:#FFFFFF; --dim:#4347A6; --sky:#D5DEE2; --warn:#8A5B0A;
+  --display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --body:"Public Sans",system-ui,-apple-system,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#121517; --panel:#1A1E20; --field:#22282A; --ink:#E2E5E0; --muted:#98A09D; --line:#2F3639;
+    --accent:#D68D5A; --accent-soft:#3A2A1F; --accent-ink:#1B1209; --dim:#A6AAF3; --sky:#1B2328; --warn:#E3B558;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#121517; --panel:#1A1E20; --field:#22282A; --ink:#E2E5E0; --muted:#98A09D; --line:#2F3639;
+  --accent:#D68D5A; --accent-soft:#3A2A1F; --accent-ink:#1B1209; --dim:#A6AAF3; --sky:#1B2328; --warn:#E3B558;
+}
+*{box-sizing:border-box}
+html,body{background:var(--paper);color:var(--ink)}
+body{font:14px/1.45 var(--body)}
+button,input,select{font:inherit;color:inherit}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px;padding:16px;height:100dvh}
+.stage{position:relative;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--sky);min-height:420px}
+#view{position:absolute;inset:0}
+#view canvas{display:block;touch-action:none}
+.views{position:absolute;top:12px;left:12px;right:12px;display:flex;flex-wrap:wrap;gap:6px;z-index:3;pointer-events:none}
+.views button{pointer-events:auto;border:1px solid var(--line);background:var(--panel);padding:6px 10px;border-radius:3px;cursor:pointer;font:500 12px/1 var(--display);font-stretch:88%;letter-spacing:.04em;text-transform:uppercase}
+.views button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.views .sep{width:1px;background:var(--line);margin:0 4px}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.compass{position:absolute;right:14px;top:56px;width:48px;height:48px;border-radius:50%;background:var(--panel);border:1px solid var(--line);display:grid;place-items:center;z-index:3}
+.compass svg{width:34px;height:34px;transition:none}
+.titleblock{position:absolute;right:12px;bottom:12px;z-index:3;background:var(--panel);border:1.5px solid var(--ink);display:grid;grid-template-columns:auto auto;font:11px/1.25 var(--mono);max-width:calc(100% - 24px)}
+.titleblock div{padding:5px 8px;border-left:1px solid var(--ink)}
+.titleblock div:first-child{border-left:0}
+.titleblock b{display:block;font:600 15px/1.1 var(--display);font-stretch:80%;letter-spacing:.02em}
+.titleblock .sheet{font:700 26px/1 var(--display);font-stretch:70%;display:grid;place-items:center}
+.sundown{position:absolute;right:72px;top:64px;z-index:3;background:var(--ink);color:var(--paper);padding:6px 10px;border-radius:3px;font:500 12px var(--body)}
+.furnbar{position:absolute;left:12px;bottom:12px;z-index:4;background:var(--panel);border:1.5px solid var(--ink);padding:10px 12px;display:flex;flex-direction:column;gap:6px;max-width:min(360px, calc(100% - 24px))}
+.furnbar[hidden],.sundown[hidden]{display:none}
+.fb-head{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.fb-head b{font:600 15px/1.1 var(--display);font-stretch:85%}
+.fb-head span{font:12px var(--mono);color:var(--muted);white-space:nowrap}
+.furnbar ul{margin:0;padding-left:16px;font-size:12.5px;color:var(--warn);display:flex;flex-direction:column;gap:2px}
+.furnbar li.ok{color:var(--muted);list-style:none;margin-left:-16px}
+.fb-actions{display:flex;flex-wrap:wrap;gap:6px}
+.fb-actions button{border:1px solid var(--line);background:var(--field);border-radius:3px;padding:5px 9px;cursor:pointer;font-size:12.5px}
+.fb-actions button:hover{border-color:var(--ink)}
+.catalog{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.cat{display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;border:1px solid var(--line);background:var(--field);border-radius:3px;padding:6px 8px;cursor:pointer}
+.cat:hover{border-color:var(--accent)}
+.cat span{font-size:12.5px;font-weight:500}
+.cat small{font:11px var(--mono);color:var(--muted)}
+.chip .x.load{font-size:12.5px;color:inherit;padding:0}
+#codeOut{width:100%;font:11px/1.4 var(--mono);background:var(--field);color:var(--ink);border:1px solid var(--line);border-radius:3px;padding:6px 7px;resize:vertical;word-break:break-all}
+#codeOut[hidden]{display:none}
+.deck-label{font:500 11px/1.2 var(--mono);color:#1E2326;background:rgba(250,248,242,.92);border:1px solid #1E2326;padding:3px 6px;white-space:nowrap;pointer-events:none}
+.deck-label.sel{background:#9E5226;color:#fff;border-color:#9E5226}
+.door-label{font:600 10px/1 var(--display);font-stretch:85%;letter-spacing:.06em;text-transform:uppercase;color:#4347A6;background:rgba(255,255,255,.8);padding:2px 4px;pointer-events:none;white-space:nowrap}
+
+.panel{overflow:auto;display:flex;flex-direction:column;gap:14px;padding-right:2px}
+.head{border:1.5px solid var(--ink);background:var(--panel)}
+.head .top{padding:12px 14px 10px}
+.eyebrow{font:500 11px/1 var(--mono);color:var(--dim);letter-spacing:.02em}
+h1{font:700 30px/1 var(--display);font-stretch:72%;margin:6px 0 2px;letter-spacing:.005em;text-wrap:balance}
+.head p{margin:0;color:var(--muted);font-size:13px}
+.head .rows{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--ink);font:11px/1.3 var(--mono)}
+.head .rows div{padding:6px 14px}
+.head .rows div+div{border-left:1px solid var(--ink)}
+.head .rows span{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.06em}
+
+section.block{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+h2{font:600 16px/1.1 var(--display);font-stretch:85%;letter-spacing:.03em;text-transform:uppercase;margin:0;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+h2 small{font:400 11px var(--mono);text-transform:none;letter-spacing:0;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--field);border-radius:999px;padding:5px 11px;cursor:pointer;font-size:12.5px;display:inline-flex;align-items:center;gap:6px}
+.chip:hover{border-color:var(--accent)}
+.chip .x{border:0;background:none;padding:0 0 0 2px;cursor:pointer;color:var(--muted);font-size:14px;line-height:1}
+.hint{margin:0;color:var(--muted);font-size:12.5px}
+.row{display:flex;gap:8px;align-items:center}
+.row input[type=text]{flex:1;min-width:0}
+input[type=text],input[type=number],select{background:var(--field);border:1px solid var(--line);border-radius:3px;padding:5px 7px;width:100%;min-width:0}
+input[type=number]{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums}
+.btn{border:1px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:3px;padding:6px 12px;cursor:pointer;font-weight:600;font-size:12.5px;white-space:nowrap}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.ghost:hover{border-color:var(--ink)}
+
+.decks{display:flex;flex-direction:column;gap:8px}
+.deck{border:1px solid var(--line);background:var(--field);border-radius:3px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.deck.sel{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.deck header{display:flex;gap:6px;align-items:center}
+.deck .dname{font-weight:600;border-color:transparent;background:transparent;padding:3px 4px}
+.deck .dname:hover,.deck .dname:focus{border-color:var(--line)}
+.tag{font:500 10px/1 var(--mono);text-transform:uppercase;letter-spacing:.05em;border:1px solid var(--muted);color:var(--muted);padding:3px 5px;border-radius:2px}
+.icon{border:1px solid transparent;background:none;cursor:pointer;width:26px;height:26px;border-radius:3px;color:var(--muted);font-size:17px;line-height:1;flex:none}
+.icon:hover{border-color:var(--line);color:var(--ink)}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:6px 8px}
+.fields .wide{grid-column:1/-1}
+.fields .check{flex-direction:row;align-items:center;gap:8px;font-size:13px;color:var(--ink);cursor:pointer;padding-top:2px}
+.fields label{display:flex;flex-direction:column;gap:2px;font-size:11px;color:var(--muted);letter-spacing:.02em}
+.meta{margin:0;font:12px/1.35 var(--mono);color:var(--ink);font-variant-numeric:tabular-nums}
+.meta .warn{color:var(--warn)}
+.total{font:12px var(--mono);color:var(--muted)}
+
+.slider{display:flex;flex-direction:column;gap:3px}
+.slider .lab{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.slider output{font:500 12px var(--mono);color:var(--ink)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.sunread{font:12px/1.4 var(--mono);color:var(--dim)}
+.toggles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.toggles label{display:flex;flex-direction:column;gap:2px;font-size:11px;color:var(--muted)}
+.checks{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px}
+.checks label{display:flex;gap:6px;align-items:center;cursor:pointer}
+input[type=checkbox]{accent-color:var(--accent)}
+details{font-size:12.5px;color:var(--muted)}
+details summary{cursor:pointer;color:var(--ink);font-weight:600}
+details ul{margin:8px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:5px}
+details b{color:var(--ink);font-weight:600}
+.err{position:absolute;inset:auto 12px 70px 12px;z-index:4;background:var(--panel);border:1px solid var(--warn);padding:10px;color:var(--ink)}
+
+@media (max-width:900px){
+  .app{grid-template-columns:1fr;height:auto}
+  .stage{height:64vh}
+  .panel{overflow:visible}
+  .titleblock{display:none}
+}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}}
+</style>
+
+<div class="app">
+  <main class="stage" aria-label="3D model">
+    <div id="view"></div>
+    <nav class="views" aria-label="Camera views">
+      <button type="button" data-view="aerial" aria-pressed="true">Aerial</button>
+      <button type="button" data-view="plan" aria-pressed="false">Plan</button>
+      <span class="sep" aria-hidden="true"></span>
+      <button type="button" data-view="kitchen" aria-pressed="false">Kitchen doors</button>
+      <button type="button" data-view="dining" aria-pressed="false">Dining doors</button>
+      <button type="button" data-view="office" aria-pressed="false">Office doors</button>
+      <span class="sep" aria-hidden="true"></span>
+      <button type="button" data-view="patio" aria-pressed="false">Photo · Walkout patio</button>
+      <button type="button" data-view="berm" aria-pressed="false">Photo · SW corner</button>
+      <button type="button" data-view="front" aria-pressed="false">Photo · Front</button>
+      <button type="button" data-view="north" aria-pressed="false">Photo · North</button>
+    </nav>
+    <div class="compass" title="North (per plan sheet A4)">
+      <svg id="needle" viewBox="0 0 34 34" aria-hidden="true"><polygon points="17,3 23,24 17,20 11,24" fill="currentColor"/><text x="17" y="33" text-anchor="middle" font-size="8" font-family="JetBrains Mono, monospace" fill="currentColor">N</text></svg>
+    </div>
+    <div class="sundown" id="sundown" hidden>Sun is below the horizon at this time</div>
+    <div class="furnbar" id="furnbar" hidden>
+      <div class="fb-head"><b id="fbName"></b><span id="fbSize"></span></div>
+      <ul id="fbWarn"></ul>
+      <div class="fb-actions">
+        <button type="button" id="fbRot">Rotate 90°</button>
+        <button type="button" id="fbRot15">Rotate 15°</button>
+        <button type="button" id="fbDup">Duplicate</button>
+        <button type="button" id="fbDel">Delete</button>
+      </div>
+    </div>
+    <div class="titleblock" aria-hidden="true">
+      <div><b>2326 I Road</b>Deck study · from Liberty A4/A5<br>1 unit = 1 ft · north per A4</div>
+      <div class="sheet">D1</div>
+    </div>
+  </main>
+
+  <aside class="panel">
+    <div class="head">
+      <div class="top">
+        <div class="eyebrow">Grand Junction, CO · 39.07° N</div>
+        <h1>2326 I Road Deck Study</h1>
+        <p>Drag to orbit, scroll to zoom, right-drag to pan. Click a deck to edit it.</p>
+      </div>
+      <div class="rows">
+        <div><span>Main house</span>59′-10½″ × 27′-9″</div>
+        <div><span>Addition</span>16′-2″ × 31′-2″</div>
+      </div>
+    </div>
+
+    <section class="block">
+      <h2>Layouts <small>saved in this browser</small></h2>
+      <div class="chips" id="presets"></div>
+      <div class="chips" id="saved"></div>
+      <div class="row">
+        <input type="text" id="saveName" placeholder="Name this layout" aria-label="Layout name">
+        <button class="btn ghost" id="saveBtn" type="button">Save</button>
+      </div>
+      <p class="hint">To share this layout, copy the link and send it. Opening the link loads the layout.</p>
+      <div class="row">
+        <button class="btn ghost" id="copyCode" type="button">Copy share link</button>
+        <span class="hint" id="codeNote" aria-live="polite"></span>
+      </div>
+      <textarea id="codeOut" rows="3" readonly hidden aria-label="Share link"></textarea>
+      <div class="row">
+        <input type="text" id="codeIn" placeholder="Or paste a share link or layout code" aria-label="Share link or layout code to load">
+        <button class="btn ghost" id="loadCode" type="button">Load</button>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>Decks <small class="total" id="total"></small></h2>
+      <div class="decks" id="decks"></div>
+      <button class="btn" id="addDeck" type="button">Add a deck</button>
+    </section>
+
+    <section class="block">
+      <h2>Furniture <small id="furnTotal"></small></h2>
+      <p class="hint">Add a piece, then drag it into place. Plan view is easiest. Select a piece to rotate, copy or delete it. Keys: R rotates 90°, Shift+R rotates 15°, D copies, Delete removes.</p>
+      <div class="catalog" id="catalog"></div>
+    </section>
+
+    <section class="block">
+      <h2>Sun &amp; shade</h2>
+      <div class="slider">
+        <div class="lab"><label for="day">Date</label><output id="dayOut"></output></div>
+        <input type="range" id="day" min="1" max="365" step="1">
+      </div>
+      <div class="slider">
+        <div class="lab"><label for="time">Time</label><output id="timeOut"></output></div>
+        <input type="range" id="time" min="300" max="1260" step="15">
+      </div>
+      <div class="sunread" id="sunRead"></div>
+    </section>
+
+    <section class="block">
+      <h2>Finish &amp; site</h2>
+      <div class="toggles">
+        <label>Decking<select id="decking">
+          <option value="cedar">Cedar</option>
+          <option value="gray">Gray composite</option>
+          <option value="walnut">Walnut composite</option>
+        </select></label>
+        <label>Railing<select id="railing">
+          <option value="cable">Wood posts + cable</option>
+          <option value="black">Black metal</option>
+          <option value="white">White</option>
+          <option value="wood">Wood</option>
+        </select></label>
+      </div>
+      <div class="slider">
+        <div class="lab"><label for="westDrop">Walkout patio below main floor</label><output id="westOut"></output></div>
+        <input type="range" id="westDrop" min="0" max="12" step="0.0833333">
+      </div>
+      <div class="slider">
+        <div class="lab"><label for="eastDrop">Yard below main floor</label><output id="eastOut"></output></div>
+        <input type="range" id="eastDrop" min="0" max="4" step="0.0833333">
+      </div>
+      <div class="checks">
+        <label><input type="checkbox" id="roof" checked> Roof</label>
+        <label><input type="checkbox" id="furniture" checked> Furniture</label>
+        <label><input type="checkbox" id="labels" checked> Labels</label>
+      </div>
+    </section>
+
+    <section class="block">
+      <details>
+        <summary>What's measured vs. assumed</summary>
+        <ul>
+          <li><b>Measured</b> from A4/A5: house and addition footprint, wall and ceiling heights (7′-11″ existing, 10′ addition), roof pitches (3:12 existing, 5:12 addition), door and window locations.</li>
+          <li><b>Checked against the Sep 13 photos:</b> north on A4 matches the evening shadows. The existing roof overhang is about 5′ (measured). The posts under the west eave are left out of the model because they aren't needed. The picket-rail deck is about 4′ deep.</li>
+          <li><b>Changed since the plans:</b> a 10′ basement NanaWall, about 6′-8″ tall, replaced the walkout door and the window south of it. Its north edge is 152″ south of the basement bath window.</li>
+          <li><b>Changed since the plans:</b> a front porch gable over the entry. Measured: the gable projects 5′ past the main eave, its roof is 14′ wide, and the cedar posts sit 1′ in from each front corner. The roof pitch (about 5:12) and porch deck size (13′ × 9′-6″) are estimated. The office French doors are placed from the north photo, about 3′-3″ from the west corner. The jog wall has a casement window with a transom where the plans showed a door.</li>
+          <li><b>Measured on site:</b> the patio concrete is about 8′ below the main floor, and the yard is about 22″ below it. The picket-rail deck's joists cantilever off the house wall with no posts.</li>
+          <li><b>Estimated from photos:</b> the hill rising at the south end, the retaining wall closing off the north end of the patio, and the sizes of the new kitchen deck and south platform.</li>
+          <li><b>Not modeled yet:</b> the shop to the northwest, the cottonwoods, and the power pole. The overhead service line runs to the southwest corner, and the meter is on the south wall. Both matter for a south deck.</li>
+          <li><b>Not in drawings:</b> depths of the "future deck" areas. The "As drawn" layout uses 3′-6″ to 4′ as a stand-in.</li>
+          <li>Every deck surface sits ½″ below the door sills, tucked right under them. Guards appear wherever the drop is more than 30″ (IRC R312), and stairs use a 7½″ rise and 10″ run.</li>
+        </ul>
+      </details>
+    </section>
+  </aside>
+</div>
+
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+const $ = s => document.querySelector(s);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function ftIn(v){
+  const neg = v < 0; v = Math.abs(v);
+  let f = Math.floor(v + 1e-6), i = Math.round((v - f) * 12);
+  if (i === 12){ f++; i = 0; }
+  return (neg ? '−' : '') + f + '′' + (i ? '-' + i + '″' : '');
+}
+const lerp = (a,b,t) => a + (b-a)*t;
+const smooth = (a,b,x) => { const t = Math.min(1, Math.max(0, (x-a)/(b-a))); return t*t*(3-2*t); };
+
+/* ---------- House geometry, feet. E = east of west wall, N = north of south wall ---------- */
+const H = {
+  mainE: 27.75, mainN: 59.875, wallH: 8.25, eave: 5, rake: 3,   // eave measured ~5′
+  offN: 72.542, bedN: 76.042, jogE: 13.75, bedE: 31.167,
+  addWall: 10, addRidgeN: 67.958, baseFloor: -8,   // walkout patio measured 8′ below main floor
+};
+const W = (E, y, N) => new THREE.Vector3(E, y, -N);
+
+/* ---------- Settings / state ---------- */
+const SIDES = {
+  W:  { label:'West wall',          origin:[0,0],          along:[0,1], out:[-1,0], from:'south end' },
+  S:  { label:'South wall',         origin:[0,0],          along:[1,0], out:[0,-1], from:'west corner' },
+  NO: { label:'North · office',     origin:[0,H.offN],     along:[1,0], out:[0,1],  from:'west corner' },
+  NB: { label:'North · bedroom',    origin:[H.jogE,H.bedN],along:[1,0], out:[0,1],  from:'office jog' },
+  EM: { label:'East · main house',  origin:[H.mainE,0],    along:[0,1], out:[1,0],  from:'south end' },
+  EB: { label:'East · bedroom',     origin:[H.bedE,H.mainN],along:[0,1],out:[1,0],  from:'addition corner' },
+};
+const PICKET = { name:'West deck · picket rail', side:'W', start:11.5, len:61, depth:4, drop:0.5, stairs:'none', support:'cantilever', rail:'all', existing:true };
+const KITCHEN = { name:'Kitchen deck · new', side:'W', start:-4, len:15.5, depth:5, drop:0.5, stairs:'none', rail:'all', existing:true };
+const FRONT = { name:'Front porch', side:'EM', start:11, len:13, depth:9.5, drop:0.5, stairs:'mid', existing:true };
+// Last shared layout (Sep 14), which is also the "Full Pergola" layout saved from the page.
+const OUR_DECKS = [
+  { ...PICKET, start:6, len:53.5, stairs:'endAlong' },
+  { ...KITCHEN, start:-16, len:22, depth:9, stairs:'endAlong' },
+  { name:'Dining deck', side:'S', start:0, len:21, depth:16, drop:0.5, stairs:'start', rail:'all',
+    pergola:{ on:true, u:12.5, w:9, o:2, dep:14.5, h:8.5 } },
+];
+const OUR_FURNITURE = [
+  { id:'f1', type:'dining6', x:16.75, n:-6, rot:0 },
+  { id:'f2', type:'grill', x:-7.75, n:-0.5, rot:90 },
+  { id:'f3', type:'sectional', x:-5.5, n:-11, rot:270 },
+  { id:'f4', type:'coffee', x:-4, n:-9.25, rot:90 },
+];
+const PRESETS = [
+  { key:'ours', name:'Our layout', decks: OUR_DECKS, furniture: OUR_FURNITURE },
+  { key:'fullpergola', name:'Full Pergola', decks: OUR_DECKS, furniture: OUR_FURNITURE },
+  { key:'today', name:'Today (from photos)', decks:[
+    PICKET, KITCHEN, FRONT,
+    { name:'South platform · in progress', side:'S', start:0, len:14, depth:5, drop:0.5, stairs:'none', existing:true },
+  ]},
+  { key:'drawn', name:'As drawn', decks:[
+    { name:'West deck', side:'W', start:0, len:72.5, depth:4, drop:0.5, stairs:'none', existing:true },
+    { name:'South deck · dining doors', side:'S', start:-4, len:17.75, depth:3.5, drop:0.5, stairs:'none' },
+    { name:'Office deck', side:'NO', start:-4, len:17.75, depth:3.5, drop:0.5, stairs:'none' },
+    FRONT,
+  ]},
+  { key:'dining', name:'Dining deck 20×14', decks:[
+    PICKET, KITCHEN, FRONT,
+    { name:'Dining deck', side:'S', start:-5, len:20, depth:14, drop:0.5, stairs:'end' },
+  ]},
+  { key:'west', name:'Big west deck 24×16', decks:[
+    { name:'Kitchen deck', side:'W', start:-4, len:24, depth:16, drop:0.5, stairs:'mid' },
+    { ...PICKET, start:20, len:52.5 }, FRONT,
+  ]},
+  { key:'wrap', name:'Wraparound', decks:[
+    { name:'West deck', side:'W', start:-4, len:30, depth:12, drop:0.5, stairs:'mid' },
+    { ...PICKET, start:26, len:46.5 }, FRONT,
+    { name:'South deck', side:'S', start:-12, len:26, depth:12, drop:0.5, stairs:'end' },
+  ]},
+];
+// The front porch is built: it's drawn as a fixed part of the house, not an editable deck.
+const isPorch = d => d.side === 'EM' && /porch/i.test(d.name || '');
+const FIXED_DECKS = [{ ...FRONT, len:14, id:'porch', fixed:true }];
+let nextId = 1;
+const withIds = list => list.filter(d => !isPorch(d)).map(d => ({ ...d, id: nextId++ }));
+const todayDoy = (() => { const n = new Date(); return Math.max(1, Math.min(365, Math.round((n - new Date(n.getFullYear(),0,0)) / 864e5))); })();
+
+const S = {
+  decks: withIds(PRESETS[0].decks), furn: JSON.parse(JSON.stringify(PRESETS[0].furniture || [])), selected: null,
+  day: todayDoy, time: 17*60, westDrop: 8, eastDrop: 22/12,
+  decking:'cedar', railing:'cable', roof:true, furniture:true, labels:true,
+};
+const store = {
+  get(k, fb){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : fb; } catch { return fb; } },
+  set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+const saved0 = store.get('deckStudy.v15.current', null);
+if (saved0 && Array.isArray(saved0.decks)){
+  Object.assign(S, saved0, { decks: withIds(saved0.decks), furn: Array.isArray(saved0.furn) ? saved0.furn : S.furn, selected:null });
+}
+
+/* ---------- Renderer / scene ---------- */
+const view = $('#view');
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setPixelRatio(Math.min(2, devicePixelRatio));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+view.appendChild(renderer.domElement);
+const labelRenderer = new CSS2DRenderer();
+Object.assign(labelRenderer.domElement.style, { position:'absolute', top:'0', left:'0', pointerEvents:'none' });
+view.appendChild(labelRenderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 2000);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = 0.09;
+controls.minDistance = 0.2; controls.maxDistance = 450;
+controls.maxPolarAngle = Math.PI * 0.495;
+
+function applySky(){
+  const c = getComputedStyle(document.documentElement).getPropertyValue('--sky').trim() || '#D5DEE2';
+  scene.background = new THREE.Color(c);
+}
+applySky();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applySky);
+new MutationObserver(applySky).observe(document.documentElement, { attributes:true, attributeFilter:['data-theme'] });
+
+const hemi = new THREE.HemisphereLight(0xE3ECF2, 0x6F6B55, 0.9);
+scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xFFF3E0, 2.6);
+sun.castShadow = true;
+sun.shadow.mapSize.set(4096, 4096);
+Object.assign(sun.shadow.camera, { left:-95, right:95, top:95, bottom:-95, near:1, far:500 });
+sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.04;
+sun.target.position.copy(W(14, 0, 36));
+scene.add(sun, sun.target);
+
+const M = (color, o={}) => new THREE.MeshStandardMaterial({ color, roughness:0.88, metalness:0, ...o });
+const mat = {
+  siding: M(0xB3372B), trim: M(0xF7F6F1), roof: M(0x86633F, { roughness:0.95 }),
+  glass: M(0x2E3A42, { roughness:0.18, metalness:0.25 }), foundation: M(0xA9A49B),
+  grade: M(0xB3A585, { roughness:1 }), frame: M(0x6E5641), soffit: M(0xF3F1EA),
+  concrete: M(0xB9B5AC), flagstone: M(0xC7AD8C), cooler: M(0xC9BFA8),
+  steel: M(0xB9BEC2, { roughness:0.35, metalness:0.7 }), stain: M(0x5B3F2C, { roughness:0.75 }),
+  table: M(0x3F3A35), chair: M(0x5B5750), grill: M(0x2A2B2D, { roughness:0.5, metalness:0.4 }),
+};
+const mesh = (geo, m, cast=true, recv=true) => { const x = new THREE.Mesh(geo, m); x.castShadow = cast; x.receiveShadow = recv; return x; };
+
+function prismXZ(points, y0, y1, m){
+  const g = new THREE.ExtrudeGeometry(new THREE.Shape(points.map(([e,n]) => new THREE.Vector2(e,n))), { depth:y1-y0, bevelEnabled:false });
+  g.rotateX(-Math.PI/2); g.translate(0, y0, 0);
+  return mesh(g, m);
+}
+function prismEY(points, nFrom, nTo, m){
+  const g = new THREE.ExtrudeGeometry(new THREE.Shape(points.map(([e,y]) => new THREE.Vector2(e,y))), { depth:nTo-nFrom, bevelEnabled:false });
+  g.translate(0, 0, -nTo);
+  return mesh(g, m);
+}
+function prismNY(points, eFrom, eTo, m){
+  const g = new THREE.ExtrudeGeometry(new THREE.Shape(points.map(([n,y]) => new THREE.Vector2(n,y))), { depth:eTo-eFrom, bevelEnabled:false });
+  g.rotateY(Math.PI/2); g.translate(eFrom, 0, 0);
+  return mesh(g, m);
+}
+
+/* ---------- Grade ---------- */
+// From the photos: sunken walkout patio on the west, a berm rising at the south end,
+// and a retaining wall closing the patio off at the north end.
+const WALL_N = 52;
+function gradeAt(E, N){
+  const patio = -S.westDrop, east = -S.eastDrop, high = -S.eastDrop;
+  let w = lerp(patio, high, smooth(16, 6, N));
+  w = lerp(w, high, smooth(WALL_N - 0.45, WALL_N + 0.45, N) * smooth(-26, -18, E));
+  return lerp(w, east, smooth(-1, 29, E));
+}
+const terrainGeo = new THREE.PlaneGeometry(300, 300, 300, 300);
+terrainGeo.rotateX(-Math.PI/2);
+terrainGeo.translate(14, 0, -38);
+const terrain = mesh(terrainGeo, mat.grade, false, true);
+scene.add(terrain);
+const siteGroup = new THREE.Group(); scene.add(siteGroup);
+function updateTerrain(){
+  const p = terrainGeo.attributes.position;
+  for (let i = 0; i < p.count; i++) p.setY(i, gradeAt(p.getX(i), -p.getZ(i)));
+  p.needsUpdate = true; terrainGeo.computeVertexNormals();
+  siteGroup.traverse(o => o.geometry?.dispose()); siteGroup.clear();
+  const top = -S.westDrop, high = -S.eastDrop;
+  const box = (m, e0, e1, n0, n1, y0, y1) => { const b = mesh(new THREE.BoxGeometry(e1-e0, y1-y0, n1-n0), m); b.position.copy(W((e0+e1)/2, (y0+y1)/2, (n0+n1)/2)); siteGroup.add(b); };
+  box(mat.foundation, -20, 0, WALL_N - 0.4, WALL_N + 0.4, top - 0.5, high + 0.4);   // retaining wall
+  box(mat.concrete, -13, 0, 17, WALL_N - 0.4, top - 0.3, top + 0.06);               // patio slab
+  box(mat.flagstone, -26, -13, 14, 44, top - 0.3, top + 0.04);                       // flagstone
+  box(mat.concrete, 4, 16, 73.8, 84, high - 0.3, high + 0.05);                       // walk at office doors
+  box(mat.frame, 4.5, 9, H.offN, 73.8, high - 0.2, -0.85);                           // step at office doors
+}
+
+/* ---------- House ---------- */
+const house = new THREE.Group(), roofGroup = new THREE.Group(), doorLabels = new THREE.Group();
+scene.add(house, roofGroup, doorLabels);
+house.add(prismXZ([[0,0],[H.mainE,0],[H.mainE,H.mainN],[0,H.mainN]], -1.5, H.wallH, mat.siding));
+house.add(prismXZ([[0,0],[H.mainE,0],[H.mainE,H.mainN],[0,H.mainN]], H.baseFloor, -1.5, mat.foundation));
+house.add(prismXZ([[0,H.mainN],[0,H.offN],[H.jogE,H.offN],[H.jogE,H.bedN],[H.bedE,H.bedN],[H.bedE,H.mainN]], -1.5, H.addWall, mat.siding));
+// gable infill
+const ridgeMain = H.wallH + (H.mainE/2) * 3/12;
+house.add(prismEY([[0,H.wallH],[H.mainE/2,ridgeMain],[H.mainE,H.wallH]], 0, H.mainN, mat.siding));
+const ridgeAdd = H.addWall + (H.bedN - H.addRidgeN) * 5/12;
+roofGroup.add(prismNY([[H.mainN,H.addWall],[H.addRidgeN,ridgeAdd],[H.bedN,H.addWall]], 0, H.bedE, mat.soffit));
+// roofs
+const t = 0.55;
+{
+  const eY = H.wallH - H.eave*3/12;
+  roofGroup.add(prismEY([[-H.eave,eY],[H.mainE/2,ridgeMain],[H.mainE+H.eave,eY],[H.mainE+H.eave,eY+t],[H.mainE/2,ridgeMain+t],[-H.eave,eY+t]], -H.rake, H.mainN + 2, mat.roof));
+  const aY = H.addWall - 1*5/12;
+  roofGroup.add(prismNY([[H.mainN-1,aY],[H.addRidgeN,ridgeAdd],[H.bedN+1,aY],[H.bedN+1,aY+t],[H.addRidgeN,ridgeAdd+t],[H.mainN-1,aY+t]], -1, H.bedE + 1, mat.roof));
+}
+
+// evaporative cooler (the old posts under the west eave are left out: not needed)
+{
+  const base = H.wallH + 9 * 3/12 + t;
+  const c = mesh(new THREE.BoxGeometry(3.2, 2.8, 3.2), mat.cooler);
+  c.position.copy(W(9, base + 1.2, 35)); roofGroup.add(c);
+}
+
+const faces = {
+  W:{axis:'E', at:0}, WJ:{axis:'E', at:H.jogE}, EM:{axis:'E', at:H.mainE}, EB:{axis:'E', at:H.bedE},
+  S:{axis:'N', at:0}, NO:{axis:'N', at:H.offN},
+};
+function opening(face, a, b, y0, y1, panes=1, transom=false){
+  const f = faces[face], w = b-a, h = y1-y0, g = new THREE.Group();
+  g.add(mesh(new THREE.BoxGeometry(w+0.34, h+0.34, 0.2), mat.trim, false));
+  g.add(mesh(new THREE.BoxGeometry(w, h, 0.26), mat.glass, false));
+  for (let i = 1; i < panes; i++){ const bar = mesh(new THREE.BoxGeometry(0.14, h, 0.3), mat.trim, false); bar.position.set(-w/2 + w*i/panes, 0, 0); g.add(bar); }
+  if (transom){ const bar = mesh(new THREE.BoxGeometry(w, 0.16, 0.3), mat.trim, false); bar.position.set(0, h/2 - 2, 0); g.add(bar); }
+  const c = (a+b)/2, yc = (y0+y1)/2;
+  if (f.axis === 'E'){ g.position.copy(W(f.at, yc, c)); g.rotation.y = Math.PI/2; }
+  else g.position.copy(W(c, yc, f.at));
+  house.add(g);
+}
+// West wall
+opening('W', 1.7, 11.4, 0, 6.9, 4);        // kitchen NanaWall
+opening('W', 17.0, 22.9, 4.0, 6.9, 3);     // kitchen slider window
+opening('W', 32.7, 35.5, 0, 6.9, 1);       // mudroom door
+opening('W', 37.8, 42.2, 1.7, 6.8, 2);
+opening('W', 45.7, 47.4, 1.7, 6.8, 1);
+opening('W', 49.5, 53.3, 1.7, 6.8, 2);
+opening('W', 62.2, 70.0, 2.9, 8.75, 3, true); // office window
+// Basement walkout (west). A 10′ NanaWall (not on the plans) replaced the old walkout door
+// and window: it starts at the door's old south jamb and runs 10′ south.
+// Measured: its north edge is 152″ south of the basement bath window (window at N 38.67–41.67 per A4).
+opening('W', 38.67 - 152/12 - 10, 38.67 - 152/12, H.baseFloor, H.baseFloor + 6.67, 3);
+opening('W', 38.67, 41.67, -5.6, -2.8, 2);  // basement bath window
+opening('W', 46.7, 50.5, -6.4, -2.3, 2);
+// Addition
+opening('WJ', 73.0, 75.2, 1.6, 8.75, 1, true);   // casement + transom (photo; plans showed a door)
+opening('NO', 3.25, 9.25, 0, 8.67, 2, true);     // office French doors, placed from the north photo
+
+// Front porch gable over the entry (built; not on the plans). Measured: the main eave sticks out ~5′,
+// the gable projects 5′ past it, the gable roof is 14′ wide, and the posts sit 1′ in from each front corner.
+const PORCH = { mid: 17.5, width: 14, front: H.mainE + 5 + 5, pitch: 5/12, eaveY: 8.0 };
+{
+  const cedar = M(0xA7703F, { roughness:0.8 });
+  const { mid, front, pitch, eaveY } = PORCH, half = PORCH.width / 2;
+  const ridge = eaveY + half * pitch;
+  roofGroup.add(prismNY([[mid-half,eaveY],[mid,ridge],[mid+half,eaveY],[mid+half,eaveY+0.45],[mid,ridge+0.45],[mid-half,eaveY+0.45]], 19, front, mat.roof));
+  roofGroup.add(prismNY([[mid-half+0.8,eaveY+0.35],[mid,ridge-0.1],[mid+half-0.8,eaveY+0.35]], front - 0.6, front - 0.35, mat.siding));
+  const postE = front - 1, postTop = eaveY + pitch - 0.1 - 0.75;
+  const beam = mesh(new THREE.BoxGeometry(0.5, 0.75, PORCH.width - 1.5), cedar);
+  beam.position.copy(W(postE, postTop + 0.375, mid)); house.add(beam);
+  [mid - (half - 1), mid + (half - 1)].forEach(N => {
+    const p = mesh(new THREE.BoxGeometry(0.46, postTop + 2, 0.46), cedar);
+    p.position.copy(W(postE, (postTop - 2)/2, N)); house.add(p);
+  });
+}
+opening('EB', 63.0, 73.0, 1.67, 8.75, 4, true);
+// East (front)
+opening('EM', 9.1, 14.4, 1.6, 6.5, 2);
+opening('EM', 16.6, 19.6, 0, 6.7, 1);
+opening('EM', 21.2, 26.0, 1.6, 6.5, 2);
+opening('EM', 26.5, 31.25, 1.6, 6.5, 2);
+opening('EM', 37.2, 40.9, 2.7, 6.5, 2);
+opening('EM', 51.3, 55.0, 2.7, 6.5, 2);
+// South
+opening('S', 1.77, 11.5, 0, 6.9, 4);       // dining NanaWall
+
+function doorLabel(text, E, y, N){
+  const el = document.createElement('div'); el.className = 'door-label'; el.textContent = text;
+  const o = new CSS2DObject(el); o.position.copy(W(E, y, N)); doorLabels.add(o);
+}
+doorLabel('Kitchen doors', -0.6, 7.5, 6.5);
+doorLabel('Dining doors', 6.6, 7.5, -0.6);
+doorLabel('Office doors', 5.6, 9.2, H.offN + 0.6);
+doorLabel('Entry', H.mainE + 0.6, 7.3, 18.1);
+doorLabel('Mudroom', -0.6, 7.5, 34.1);
+doorLabel('Basement doors', -0.6, -1.9, 21.4);
+
+/* ---------- Textures ---------- */
+function canvasTex(w, h, draw){
+  const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h);
+  const tx = new THREE.CanvasTexture(c); tx.wrapS = tx.wrapT = THREE.RepeatWrapping; tx.colorSpace = THREE.SRGBColorSpace; tx.anisotropy = 8;
+  return tx;
+}
+const boardTex = canvasTex(256, 256, (g, w, h) => {
+  g.fillStyle = '#ffffff'; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 8; i++){
+    const y = i * 32;
+    g.fillStyle = `rgba(0,0,0,${0.03 + (i*37 % 7)/120})`; g.fillRect(0, y, w, 32);
+    g.fillStyle = 'rgba(0,0,0,.45)'; g.fillRect(0, y + 30, w, 2);
+    g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect((i*97) % w, y, 2, 30);
+  }
+});
+const balTex = canvasTex(32, 8, (g) => { g.clearRect(0,0,32,8); g.fillStyle = '#ffffff'; g.fillRect(13, 0, 6, 8); });
+const DECKING = { cedar:0xC08654, gray:0xA39E95, walnut:0x7A5A43 };
+const RAILING = { cable:0x5B3F2C, black:0x232426, white:0xF2F1EC, wood:0x9C6B45 };
+
+/* ---------- Decks ---------- */
+const deckGroup = new THREE.Group(); scene.add(deckGroup);
+const pickables = [];
+
+function rectOf(d){
+  const s = SIDES[d.side];
+  const P = (u, o) => [s.origin[0] + s.along[0]*(d.start+u) + s.out[0]*o, s.origin[1] + s.along[1]*(d.start+u) + s.out[1]*o];
+  const pts = [P(0,0), P(d.len,0), P(d.len,d.depth), P(0,d.depth)];
+  const es = pts.map(p => p[0]), ns = pts.map(p => p[1]);
+  return { s, P, pts, minE:Math.min(...es), maxE:Math.max(...es), minN:Math.min(...ns), maxN:Math.max(...ns) };
+}
+const inRect = (r, E, N) => E > r.minE + 1e-3 && E < r.maxE - 1e-3 && N > r.minN + 1e-3 && N < r.maxN - 1e-3;
+function inHouse(E, N){
+  if (E > 0 && E < H.mainE && N > 0 && N < H.mainN) return true;
+  if (N >= H.mainN - 0.01 && N < H.offN && E > 0 && E < H.bedE) return true;
+  if (N >= H.offN && N < H.bedN && E > H.jogE && E < H.bedE) return true;
+  return false;
+}
+// Stairs leave either the outer edge (heading away from the house) or the end of the deck's
+// outer strip (heading parallel to the house). Returns the plan footprint for guard gaps.
+function stairInfo(d, r, y0){
+  if (d.stairs === 'none' || d.len < 4.5) return null;
+  const Wd = 4, alongStair = d.stairs === 'endAlong' || d.stairs === 'startAlong';
+  if (alongStair && d.depth < Wd) return null;
+  const [aE, aN] = r.s.along, [oE, oN] = r.s.out;
+  let base, dir;
+  if (alongStair){
+    const atEnd = d.stairs === 'endAlong';
+    base = r.P(atEnd ? d.len : 0, d.depth - Wd/2);
+    dir = atEnd ? [aE, aN] : [-aE, -aN];
+  } else {
+    const u = d.stairs === 'start' ? Math.min(2.5, d.len/2) : d.stairs === 'end' ? Math.max(d.len - 2.5, d.len/2) : d.len/2;
+    base = r.P(u, d.depth);
+    dir = [oE, oN];
+  }
+  let n = 1, rise = 0.625;
+  const run = 0.8333;
+  // Walk the stair down until its foot meets the ground (a long run down a hill needs many passes).
+  for (let it = 0; it < 60; it++){
+    const reach = Math.max(0, n-1) * run + 0.4;
+    const h = y0 - gradeAt(base[0] + dir[0]*reach, base[1] + dir[1]*reach);
+    const next = Math.max(1, Math.round(h / 0.625));
+    rise = h / next;
+    if (next === n && it > 0) break;
+    n = next;
+  }
+  const total = Math.max(0, n-1) * run;
+  const perp = [-dir[1], dir[0]], far = total + 0.5;
+  const pts = [-1, 1].flatMap(s => [
+    [base[0] + perp[0]*s*Wd/2, base[1] + perp[1]*s*Wd/2],
+    [base[0] + perp[0]*s*Wd/2 + dir[0]*far, base[1] + perp[1]*s*Wd/2 + dir[1]*far],
+  ]);
+  const es = pts.map(p => p[0]), ns = pts.map(p => p[1]);
+  const box = { minE:Math.min(...es) - 0.05, maxE:Math.max(...es) + 0.05, minN:Math.min(...ns) - 0.05, maxN:Math.max(...ns) + 0.05 };
+  return { n, rise, run, total, Wd, box, height: rise*n, base, dir };
+}
+
+// Pergola sitting on a deck. u/w run along the deck from its start; o/dep run out from the house side.
+function buildPergola(d, r, y0, phi){
+  const p = d.pergola, u0 = p.u, u1 = p.u + p.w, o0 = p.o, o1 = p.o + p.dep;
+  const postH = Math.max(6, p.h - 0.4);
+  const put = (geo, u, o, y) => { const m = mesh(geo, mat.stain); const q = r.P(u, o); m.position.copy(W(q[0], y, q[1])); m.rotation.y = phi; deckGroup.add(m); };
+  const pu = [u0 + 0.5, u1 - 0.5], po = [o0 + 0.5, o1 - 0.5];
+  pu.forEach((u, iu) => po.forEach(o => {
+    put(new THREE.BoxGeometry(0.46, postH, 0.46), u, o, y0 + postH/2);
+    const s = iu === 0 ? 1 : -1;   // knee brace toward the span
+    const g = new THREE.Group(); const q = r.P(u, o); g.position.copy(W(q[0], y0, q[1])); g.rotation.y = phi;
+    const b = mesh(new THREE.BoxGeometry(2.3, 0.29, 0.29), mat.stain); b.position.set(s*0.8, postH - 0.95, 0); b.rotation.z = s*Math.PI/4; g.add(b);
+    deckGroup.add(g);
+  }));
+  po.forEach(o => [-0.2, 0.2].forEach(off => put(new THREE.BoxGeometry(p.w + 1.5, 0.8, 0.15), (u0+u1)/2, o + off, y0 + postH - 0.4)));
+  const nR = Math.max(2, Math.floor(p.w / 1.33) + 1);
+  for (let i = 0; i < nR; i++) put(new THREE.BoxGeometry(0.15, 0.6, p.dep + 1.5), u0 + 0.25 + i*(p.w - 0.5)/(nR - 1), (o0+o1)/2, y0 + postH + 0.3);
+  const nS = Math.max(2, Math.floor((p.dep + 1) / 0.6) + 1);
+  for (let j = 0; j < nS; j++) put(new THREE.BoxGeometry(p.w + 1, 0.12, 0.15), (u0+u1)/2, o0 - 0.5 + j*(p.dep + 1)/(nS - 1), y0 + postH + 0.66);
+}
+
+// Guard infill that follows a stair's slope, with balusters kept vertical.
+function slopedInfill(x, Z, H, color){
+  const lineY = z => -H * z / Z;
+  const P = [[0, lineY(0) + 2.75], [Z, lineY(Z) + 2.75], [Z, lineY(Z) + 0.35], [0, lineY(0) + 0.35]];
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(P.flatMap(([z, y]) => [x, y, z]), 3));
+  geo.setAttribute('uv', new THREE.Float32BufferAttribute([0, 1, Z/0.36, 1, Z/0.36, 0, 0, 0], 2));
+  geo.setIndex([0, 3, 1, 1, 3, 2]); geo.computeVertexNormals();
+  const tx = balTex.clone(); tx.needsUpdate = true;
+  return mesh(geo, new THREE.MeshStandardMaterial({ color, map:tx, alphaTest:0.5, side:THREE.DoubleSide, roughness:0.6 }), false, false);
+}
+
+// Local frame on a deck: x = along the wall, z = away from the wall.
+function frameOf(r){
+  const [aE, aN] = r.s.along, [oE, oN] = r.s.out;
+  const phi = Math.atan2(aN, aE);
+  const sgn = (aN*oE + aE*(-oN)) >= 0 ? 1 : -1;
+  return { phi, sgn };
+}
+
+function railSegment(A, B, y0, color){
+  const dE = B[0]-A[0], dN = B[1]-A[1], L = Math.hypot(dE, dN);
+  if (L < 0.4) return;
+  const g = new THREE.Group();
+  g.position.copy(W((A[0]+B[0])/2, y0, (A[1]+B[1])/2));
+  g.rotation.y = Math.atan2(dN, dE);
+  if (S.railing === 'cable'){
+    // stained wood posts bolted to the rim, a flat wood cap, horizontal stainless cables
+    const cap = mesh(new THREE.BoxGeometry(L + 0.3, 0.12, 0.46), mat.stain); cap.position.y = 3.06; g.add(cap);
+    for (let y = 0.35; y <= 2.86; y += 0.25){
+      const w = mesh(new THREE.BoxGeometry(L, 0.025, 0.025), mat.steel, false, false); w.position.y = y; g.add(w);
+    }
+    const nPosts = Math.max(1, Math.ceil(L / 5));
+    for (let i = 0; i <= nPosts; i++){
+      const p = mesh(new THREE.BoxGeometry(0.3, 3.9, 0.3), mat.stain); p.position.set(-L/2 + L*i/nPosts, 1.05, 0); g.add(p);
+    }
+    deckGroup.add(g);
+    return;
+  }
+  const rm = M(color, { roughness: 0.6 });
+  const top = mesh(new THREE.BoxGeometry(L, 0.13, 0.26), rm); top.position.y = 3.0; g.add(top);
+  const bot = mesh(new THREE.BoxGeometry(L, 0.08, 0.12), rm); bot.position.y = 0.3; g.add(bot);
+  const tx = balTex.clone(); tx.needsUpdate = true; tx.repeat.set(L / 0.36, 1);
+  const infill = mesh(new THREE.PlaneGeometry(L, 2.62), new THREE.MeshStandardMaterial({ color, map:tx, alphaTest:0.5, side:THREE.DoubleSide, roughness:0.6 }), false, false);
+  infill.position.y = 1.65; g.add(infill);
+  const nPosts = Math.max(1, Math.ceil(L / 6));
+  for (let i = 0; i <= nPosts; i++){
+    const p = mesh(new THREE.BoxGeometry(0.3, 3.1, 0.3), rm); p.position.set(-L/2 + L*i/nPosts, 1.55, 0); g.add(p);
+  }
+  deckGroup.add(g);
+}
+
+function buildDeck(d, rects, i){
+  const r = rects[i];
+  const y0 = -d.drop / 12;
+  const sel = S.selected === d.id;
+  const wE = r.maxE - r.minE, dN = r.maxN - r.minN;
+  const cE = (r.minE + r.maxE)/2, cN = (r.minN + r.maxN)/2;
+  const { phi, sgn } = frameOf(r);
+
+  const tx = boardTex.clone(); tx.needsUpdate = true;
+  tx.repeat.set(wE/4, dN/4); tx.center.set(0.5, 0.5);
+  tx.rotation = r.s.along[1] ? Math.PI/2 : 0;
+  const surfMat = M(DECKING[S.decking], { map:tx, roughness:0.8, emissive: sel ? 0x6B2A08 : 0x000000, emissiveIntensity: sel ? 0.35 : 0 });
+  const surf = mesh(new THREE.BoxGeometry(wE, 0.1, dN), surfMat);
+  surf.position.copy(W(cE, y0 - 0.05, cN)); surf.userData.deckId = d.id;
+  deckGroup.add(surf); if (!d.fixed) pickables.push(surf);
+
+  const rimMat = M(DECKING[S.decking], { roughness:0.85 }); rimMat.color.multiplyScalar(0.78);
+  const rimH = 0.85;
+  [[wE, 0.1, cE, r.minN + 0.05], [wE, 0.1, cE, r.maxN - 0.05]].forEach(([w,,e,n]) => { const m = mesh(new THREE.BoxGeometry(w, rimH, 0.1), rimMat); m.position.copy(W(e, y0 - 0.1 - rimH/2, n)); deckGroup.add(m); });
+  [[r.minE + 0.05], [r.maxE - 0.05]].forEach(([e]) => { const m = mesh(new THREE.BoxGeometry(0.1, rimH, dN), rimMat); m.position.copy(W(e, y0 - 0.1 - rimH/2, cN)); deckGroup.add(m); });
+
+  // beams + posts (beam lines parallel to the wall)
+  const beamLines = d.support === 'cantilever' ? [] : [Math.max(0.5, d.depth - 1)];
+  if (d.support !== 'cantilever' && d.depth > 13) beamLines.push(d.depth / 2);
+  const beamTop = y0 - 0.1 - rimH;
+  beamLines.forEach(o => {
+    const n = Math.max(1, Math.ceil((d.len - 1.5) / 8));
+    const a = r.P(0.4, o), b = r.P(d.len - 0.4, o);
+    const beam = mesh(new THREE.BoxGeometry(Math.hypot(b[0]-a[0], b[1]-a[1]), 0.8, 0.3), mat.frame);
+    beam.position.copy(W((a[0]+b[0])/2, beamTop - 0.4, (a[1]+b[1])/2)); beam.rotation.y = phi; deckGroup.add(beam);
+    for (let k = 0; k <= n; k++){
+      const p = r.P(0.75 + (d.len - 1.5) * k / n, o);
+      const g = gradeAt(p[0], p[1]), top = beamTop - 0.8, h = top - g;
+      if (h < 0.15) continue;
+      const post = mesh(new THREE.BoxGeometry(0.46, h, 0.46), mat.frame);
+      post.position.copy(W(p[0], g + h/2, p[1])); deckGroup.add(post);
+    }
+  });
+
+  // stairs
+  const st = stairInfo(d, r, y0);
+  if (st){
+    // local frame: z runs down the stair, x across it
+    const g = new THREE.Group(); g.position.copy(W(st.base[0], y0, st.base[1]));
+    g.rotation.y = Math.atan2(st.dir[0], -st.dir[1]);
+    const sm = M(DECKING[S.decking], { roughness:0.8 });
+    for (let k = 1; k < st.n; k++){
+      const tread = mesh(new THREE.BoxGeometry(st.Wd, 0.1, 0.95), sm);
+      tread.position.set(0, -k*st.rise - 0.05, (k - 1) * st.run + 0.47);
+      g.add(tread);
+    }
+    const Z = st.total + 0.8, len = Math.hypot(Z, st.height), ang = Math.atan2(st.height, Z);
+    const railed = st.n >= 4 || st.height > 2.5;   // handrails on 4+ risers
+    const rm = M(RAILING[S.railing], { roughness:0.6 });
+    [-st.Wd/2, st.Wd/2].forEach(x => {
+      const s = mesh(new THREE.BoxGeometry(0.12, 0.8, len), rimMat);
+      s.position.set(x, -st.height/2 - 0.35, Z/2); s.rotation.x = ang; g.add(s);
+      if (!railed) return;
+      const hr = mesh(new THREE.BoxGeometry(0.14, 0.13, len), rm);
+      hr.position.set(x, -st.height/2 + 2.9, Z/2); hr.rotation.x = ang; g.add(hr);
+      if (S.railing === 'cable'){
+        for (let off = 0.35; off <= 2.66; off += 0.25){
+          const w = mesh(new THREE.BoxGeometry(0.025, 0.025, len), mat.steel, false, false);
+          w.position.set(x, -st.height/2 + off, Z/2); w.rotation.x = ang; g.add(w);
+        }
+      } else g.add(slopedInfill(x, Z, st.height, RAILING[S.railing]));
+      [0.15, Z - 0.15].forEach(z => {
+        const p = mesh(new THREE.BoxGeometry(0.3, 3.1, 0.3), rm);
+        p.position.set(x, -st.height * z / Z + 1.55, z); g.add(p);
+      });
+    });
+    deckGroup.add(g);
+  }
+
+  // guards where the drop exceeds 30"
+  const c = [cE, cN];
+  let maxDrop = 0;
+  const edges = [[r.pts[0], r.pts[1]], [r.pts[1], r.pts[2]], [r.pts[2], r.pts[3]], [r.pts[3], r.pts[0]]];
+  edges.forEach(([A, B]) => {
+    const L = Math.hypot(B[0]-A[0], B[1]-A[1]); if (L < 0.1) return;
+    const vert = Math.abs(B[0]-A[0]) < 1e-6;
+    const m = [(A[0]+B[0])/2, (A[1]+B[1])/2];
+    const nE = vert ? Math.sign(m[0]-c[0]) : 0, nN = vert ? 0 : Math.sign(m[1]-c[1]);
+    const step = 0.25, samples = Math.ceil(L/step);
+    let runStart = null;
+    const flush = k => { if (runStart !== null){ const t0 = runStart/samples, t1 = k/samples; railSegment([lerp(A[0],B[0],t0), lerp(A[1],B[1],t0)], [lerp(A[0],B[0],t1), lerp(A[1],B[1],t1)], y0, RAILING[S.railing]); runStart = null; } };
+    for (let k = 0; k <= samples; k++){
+      const tt = Math.min(1, (k + 0.5)/samples);
+      const E = lerp(A[0], B[0], tt), N = lerp(A[1], B[1], tt);
+      const qE = E + nE*0.15, qN = N + nN*0.15;
+      const drop = y0 - gradeAt(qE, qN);
+      if (!inHouse(qE, qN) && !rects.some((o, j) => j !== i && inRect(o, qE, qN))) maxDrop = Math.max(maxDrop, drop);
+      const wantRail = d.rail === 'all' ? true : d.rail === 'none' ? false : drop > 2.5;
+      const open = k < samples && wantRail && !inHouse(qE, qN) && !rects.some((o, j) => j !== i && inRect(o, qE, qN)) && !(st && inRect(st.box, qE, qN));
+      if (open && runStart === null) runStart = k;
+      if (!open) flush(k);
+    }
+    flush(samples);
+  });
+
+  if (d.pergola?.on) buildPergola(d, r, y0, phi);
+
+  // label
+  if (S.labels && !d.fixed){
+    const el = document.createElement('div');
+    el.className = 'deck-label' + (sel ? ' sel' : '');
+    el.textContent = `${ftIn(d.len)} × ${ftIn(d.depth)} · ${Math.round(d.len*d.depth)} ft²`;
+    const lab = new CSS2DObject(el);
+    const lp = r.P(d.len/2, d.depth/2); lab.position.copy(W(lp[0], y0 + 0.6, lp[1]));
+    deckGroup.add(lab);
+  }
+  return { maxDrop, stairs: st };
+}
+
+const sharedMats = new Set(Object.values(mat));
+function rebuild(){
+  deckGroup.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material && !sharedMats.has(o.material)){ if (o.material.map && o.material.map !== boardTex && o.material.map !== balTex) o.material.map.dispose(); o.material.dispose(); } if (o.isCSS2DObject) o.element.remove(); });
+  deckGroup.clear(); pickables.length = 0;
+  const valid = [...S.decks.filter(d => d.len > 0 && d.depth > 0), ...FIXED_DECKS];
+  const rects = valid.map(rectOf);
+  deckRects = valid.map((d, i) => ({ ...rects[i], y: -d.drop/12 }));
+  stairZones = [];
+  let area = 0;
+  valid.forEach((d, i) => {
+    const info = buildDeck(d, rects, i);
+    if (!d.fixed) area += d.len * d.depth;
+    if (info.stairs){
+      // the stair itself, plus 3′ kept clear on the deck at its top
+      const st = info.stairs, y0 = -d.drop/12, perp = [-st.dir[1], st.dir[0]];
+      const pts = [-1, 1].flatMap(s => [
+        [st.base[0] + perp[0]*s*st.Wd/2, st.base[1] + perp[1]*s*st.Wd/2],
+        [st.base[0] + perp[0]*s*st.Wd/2 - st.dir[0]*3, st.base[1] + perp[1]*s*st.Wd/2 - st.dir[1]*3],
+      ]);
+      stairZones.push({ box: st.box, y: y0 }, { box: { minE:Math.min(...pts.map(p => p[0])), maxE:Math.max(...pts.map(p => p[0])), minN:Math.min(...pts.map(p => p[1])), maxN:Math.max(...pts.map(p => p[1])) }, y: y0 });
+    }
+    const meta = document.getElementById(`d${d.id}-meta`);
+    if (meta){
+      const parts = [`${ftIn(d.len)} × ${ftIn(d.depth)} · ${Math.round(d.len*d.depth)} ft²`, `up to ${ftIn(info.maxDrop)} above grade`];
+      let html = esc(parts.join(' · '));
+      if (info.maxDrop > 2.5) html += ` · <span class="warn">guards required</span>`;
+      if (d.support === 'cantilever') html += d.depth > 4 ? ` · <span class="warn">deeper than a typical cantilever. Plan on a beam and posts, or an engineer's design</span>` : ' · cantilevered, no posts';
+      if (info.stairs) html += ` · ${info.stairs.n} risers, ${ftIn(info.stairs.total)} run`;
+      if (d.pergola?.on){
+        const p = d.pergola, past = p.u < -0.01 || p.u + p.w > d.len + 0.01 || p.o < -0.01 || p.o + p.dep > d.depth + 0.01;
+        html += ` · pergola ${ftIn(p.w)} × ${ftIn(p.dep)}` + (past ? ` <span class="warn">(extends past the deck)</span>` : '');
+      }
+      meta.innerHTML = html;
+    }
+  });
+  $('#total').textContent = `${S.decks.length} ${S.decks.length === 1 ? 'deck' : 'decks'} · ${Math.round(area)} ft²`;
+  doorLabels.children.forEach(o => { o.visible = S.labels; });
+  rebuildFurniture();
+  persist();
+}
+let queued = false;
+const schedule = () => { if (!queued){ queued = true; requestAnimationFrame(() => { queued = false; rebuild(); }); } };
+
+/* ---------- Deck list UI ---------- */
+const sideOptions = sel => Object.entries(SIDES).map(([k, s]) => `<option value="${k}"${k === sel ? ' selected' : ''}>${s.label}</option>`).join('');
+const stairOptions = sel => [['none','None'],['start','Outer edge, at start'],['mid','Outer edge, middle'],['end','Outer edge, at end'],['endAlong','Off the end, along the house'],['startAlong','Off the start, along the house']].map(([v, l]) => `<option value="${v}"${v === sel ? ' selected' : ''}>${l}</option>`).join('');
+function renderDecks(){
+  $('#decks').innerHTML = S.decks.map(d => `
+    <article class="deck${S.selected === d.id ? ' sel' : ''}" data-id="${d.id}">
+      <header>
+        <input type="text" class="dname" id="d${d.id}-name" value="${esc(d.name)}" aria-label="Deck name">
+        ${d.existing ? '<span class="tag">Existing</span>' : ''}
+        <button type="button" class="icon" data-del="${d.id}" aria-label="Remove ${esc(d.name)}">×</button>
+      </header>
+      <div class="fields">
+        <label>Wall<select id="d${d.id}-side" data-f="side">${sideOptions(d.side)}</select></label>
+        <label>Stairs<select id="d${d.id}-stairs" data-f="stairs">${stairOptions(d.stairs)}</select></label>
+        <label id="d${d.id}-startlab">Start, ft from ${SIDES[d.side].from}<input type="number" step="0.5" id="d${d.id}-start" data-f="start" value="${d.start}"></label>
+        <label>Along wall, ft<input type="number" step="0.5" min="1" id="d${d.id}-len" data-f="len" value="${d.len}"></label>
+        <label>Out from wall, ft<input type="number" step="0.5" min="1" id="d${d.id}-depth" data-f="depth" value="${d.depth}"></label>
+        <label>Step down from floor, in<input type="number" step="0.25" min="0" max="120" id="d${d.id}-drop" data-f="drop" value="${d.drop}"></label>
+        <label class="wide">Support<select id="d${d.id}-support" data-f="support">
+          <option value="posts"${d.support !== 'cantilever' ? ' selected' : ''}>Beam and posts</option>
+          <option value="cantilever"${d.support === 'cantilever' ? ' selected' : ''}>Joists cantilevered off the house, no posts</option>
+        </select></label>
+        <label class="wide">Railing<select id="d${d.id}-rail" data-f="rail">
+          <option value="auto"${!d.rail || d.rail === 'auto' ? ' selected' : ''}>Only where required (over 30″ up)</option>
+          <option value="all"${d.rail === 'all' ? ' selected' : ''}>All open edges, except at stairs</option>
+          <option value="none"${d.rail === 'none' ? ' selected' : ''}>None</option>
+        </select></label>
+        <label class="wide check"><input type="checkbox" id="d${d.id}-pg-on" data-f="pg-on"${d.pergola?.on ? ' checked' : ''}> Pergola</label>
+        ${d.pergola?.on ? `
+        <label>Pergola start, ft along deck<input type="number" step="0.5" id="d${d.id}-pg-u" data-f="pg-u" value="${d.pergola.u}"></label>
+        <label>Pergola width, ft<input type="number" step="0.5" min="1" id="d${d.id}-pg-w" data-f="pg-w" value="${d.pergola.w}"></label>
+        <label>Pergola start, ft out from house<input type="number" step="0.5" id="d${d.id}-pg-o" data-f="pg-o" value="${d.pergola.o}"></label>
+        <label>Pergola depth, ft<input type="number" step="0.5" min="1" id="d${d.id}-pg-dep" data-f="pg-dep" value="${d.pergola.dep}"></label>
+        <label class="wide">Pergola height, ft<input type="number" step="0.5" min="7" max="14" id="d${d.id}-pg-h" data-f="pg-h" value="${d.pergola.h}"></label>` : ''}
+      </div>
+      <p class="meta" id="d${d.id}-meta"></p>
+    </article>`).join('');
+}
+$('#decks').addEventListener('input', e => {
+  const card = e.target.closest('.deck'); if (!card) return;
+  const d = S.decks.find(x => x.id === +card.dataset.id); if (!d) return;
+  if (e.target.classList.contains('dname')){ d.name = e.target.value; schedule(); return; }
+  const f = e.target.dataset.f; if (!f) return;
+  if (f.startsWith('pg-')){
+    d.pergola = d.pergola || { on:false, u:Math.max(0, d.len/2 - 5), w:Math.min(10, d.len), o:Math.min(1, d.depth/4), dep:Math.min(10, d.depth), h:9 };
+    if (f === 'pg-on'){ d.pergola.on = e.target.checked; renderDecks(); rebuild(); return; }
+    const v = parseFloat(e.target.value); if (!Number.isFinite(v)) return;
+    const k = f.slice(3);
+    d.pergola[k] = (k === 'u' || k === 'o') ? v : Math.max(1, v);
+    schedule(); return;
+  }
+  if (f === 'side' || f === 'stairs' || f === 'support' || f === 'rail'){
+    d[f] = e.target.value;
+    if (f === 'side'){ const lab = document.getElementById(`d${d.id}-startlab`); lab.firstChild.textContent = `Start, ft from ${SIDES[d.side].from}`; }
+  } else {
+    const v = parseFloat(e.target.value); if (!Number.isFinite(v)) return;
+    d[f] = f === 'drop' ? Math.max(0, v) : f === 'start' ? v : Math.max(0.5, v);
+  }
+  schedule();
+});
+$('#decks').addEventListener('click', e => {
+  const del = e.target.closest('[data-del]');
+  if (del){ S.decks = S.decks.filter(d => d.id !== +del.dataset.del); if (S.selected === +del.dataset.del) S.selected = null; renderDecks(); rebuild(); return; }
+  const card = e.target.closest('.deck');
+  if (card && S.selected !== +card.dataset.id){ select(+card.dataset.id, false); }
+});
+function select(id, scroll){
+  S.selected = id;
+  document.querySelectorAll('.deck').forEach(c => c.classList.toggle('sel', +c.dataset.id === id));
+  if (scroll && id){ const c = document.querySelector(`.deck[data-id="${id}"]`); c?.scrollIntoView({ block:'nearest', behavior: reduced ? 'auto' : 'smooth' }); }
+  rebuild();
+}
+$('#addDeck').addEventListener('click', () => {
+  const d = { id: nextId++, name:`Deck ${S.decks.length + 1}`, side:'S', start:14, len:12, depth:12, drop:0.5, stairs:'mid' };
+  S.decks.push(d); S.selected = d.id; renderDecks(); rebuild();
+  document.getElementById(`d${d.id}-name`)?.focus();
+});
+
+/* ---------- Furniture ---------- */
+// w runs along the piece's local x, d along its local depth; both include room to pull chairs out.
+const FURN = {
+  dining6:   { label:'Dining table, 6 seats', w:7,    d:8.5 },
+  dining8:   { label:'Dining table, 8 seats', w:10.5, d:9 },
+  round4:    { label:'Round table, 4 seats',  w:8,    d:8 },
+  bistro:    { label:'Bistro set',            w:5,    d:3.5 },
+  lounge:    { label:'Lounge chair',          w:2.6,  d:2.9 },
+  sofa:      { label:'Sofa',                  w:7,    d:3 },
+  sectional: { label:'Sectional',             w:9,    d:7 },
+  coffee:    { label:'Coffee table',          w:4,    d:2 },
+  grill:     { label:'Grill',                 w:5,    d:2.2 },
+  firetable: { label:'Fire table',            w:4,    d:2.5 },
+  hottub:    { label:'Hot tub',               w:7.5,  d:7.5 },
+  umbrella:  { label:'Umbrella, 9′ canopy',   w:1.5,  d:1.5 },
+  planter:   { label:'Planter',               w:2,    d:2 },
+};
+const FM = {
+  wood: M(0x6B4A33, { roughness:0.7 }), metal: M(0x2B2C2E, { roughness:0.5, metalness:0.4 }), cushion: M(0xD8D0BF),
+  stone: M(0x8F8A80), water: M(0x6FB5C6, { roughness:0.15, metalness:0.1 }), clay: M(0xA85A38), leaf: M(0x5E7F47),
+  canopy: M(0xEAE3D2, { side:THREE.DoubleSide }),
+  fire: new THREE.MeshStandardMaterial({ color:0xFF8A3D, emissive:0xFF6A1A, emissiveIntensity:1.6 }),
+};
+Object.values(FM).forEach(m => sharedMats.add(m));
+const Bx = (a, h, b) => new THREE.BoxGeometry(a, h, b);
+const Cy = (r, h) => new THREE.CylinderGeometry(r, r, h, 24);
+// place a part at plan-local (a, b) and height y (center)
+function part(g, geo, m, a, y, b){ const x = mesh(geo, m); x.position.set(a, y, -b); g.add(x); return x; }
+// a chair whose sitter faces local +b, rotated by `turn`
+function chairAt(g, a, b, turn){
+  const c = new THREE.Group(); c.position.set(a, 0, -b); c.rotation.y = turn;
+  part(c, Bx(1.5, 0.12, 1.5), FM.metal, 0, 1.5, 0);
+  part(c, Bx(1.5, 1.4, 0.12), FM.metal, 0, 2.2, -0.7);
+  part(c, Bx(1.3, 1.45, 1.3), FM.metal, 0, 0.72, 0);
+  g.add(c);
+}
+const BUILD = {
+  dining6(g){ part(g, Bx(6, 0.12, 3.25), FM.wood, 0, 2.45, 0); part(g, Bx(4.5, 2.4, 0.3), FM.wood, 0, 1.2, 0);
+    [-2, 0, 2].forEach(a => { chairAt(g, a, -2.45, 0); chairAt(g, a, 2.45, Math.PI); }); },
+  dining8(g){ part(g, Bx(8, 0.12, 3.5), FM.wood, 0, 2.45, 0); part(g, Bx(6.5, 2.4, 0.3), FM.wood, 0, 1.2, 0);
+    [-2.6, 0, 2.6].forEach(a => { chairAt(g, a, -2.6, 0); chairAt(g, a, 2.6, Math.PI); });
+    chairAt(g, -4.6, 0, -Math.PI/2); chairAt(g, 4.6, 0, Math.PI/2); },
+  round4(g){ part(g, Cy(2, 0.12), FM.wood, 0, 2.45, 0); part(g, Cy(0.35, 2.4), FM.wood, 0, 1.2, 0);
+    chairAt(g, 0, -3, 0); chairAt(g, 0, 3, Math.PI); chairAt(g, -3, 0, -Math.PI/2); chairAt(g, 3, 0, Math.PI/2); },
+  bistro(g){ part(g, Cy(1, 0.08), FM.metal, 0, 2.35, 0); part(g, Cy(0.08, 2.3), FM.metal, 0, 1.15, 0);
+    chairAt(g, -1.8, 0, -Math.PI/2); chairAt(g, 1.8, 0, Math.PI/2); },
+  lounge(g){ part(g, Bx(2.2, 1.1, 2.4), FM.cushion, 0, 0.55, 0.1); part(g, Bx(2.2, 1.6, 0.4), FM.cushion, 0, 1.6, -1.2);
+    [-1.2, 1.2].forEach(a => part(g, Bx(0.2, 1.7, 2.8), FM.metal, a, 0.85, 0)); },
+  sofa(g){ part(g, Bx(6, 1.2, 2.6), FM.cushion, 0, 0.6, 0.2); part(g, Bx(7, 1.6, 0.5), FM.cushion, 0, 1.7, -1.25);
+    [-3.25, 3.25].forEach(a => part(g, Bx(0.5, 1.9, 3), FM.cushion, a, 0.95, 0)); },
+  sectional(g){ part(g, Bx(9, 1.2, 3), FM.cushion, 0, 0.6, -2); part(g, Bx(9, 1.6, 0.5), FM.cushion, 0, 1.7, -3.25);
+    part(g, Bx(3, 1.2, 4), FM.cushion, 3, 0.6, 1.5); part(g, Bx(0.5, 1.6, 4), FM.cushion, 4.25, 1.7, 1.5); },
+  coffee(g){ part(g, Bx(4, 0.12, 2), FM.wood, 0, 1.3, 0); part(g, Bx(3.4, 1.25, 1.4), FM.metal, 0, 0.62, 0); },
+  grill(g){ part(g, Bx(3, 2.2, 1.8), FM.metal, 0, 1.1, 0); part(g, Bx(3, 1.1, 1.9), FM.metal, 0, 2.75, 0);
+    [-2, 2].forEach(a => part(g, Bx(1, 0.1, 1.8), FM.metal, a, 2.2, 0)); },
+  firetable(g){ part(g, Bx(4, 1.9, 2.5), FM.stone, 0, 0.95, 0); const f = part(g, Bx(2.6, 0.08, 0.7), FM.fire, 0, 1.95, 0); f.castShadow = false; },
+  hottub(g){ part(g, Bx(7.5, 3, 7.5), FM.wood, 0, 1.5, 0); part(g, Bx(6.9, 0.06, 6.9), FM.water, 0, 3.0, 0); },
+  umbrella(g){ part(g, Bx(1.4, 0.3, 1.4), FM.metal, 0, 0.15, 0); part(g, Cy(0.07, 8), FM.metal, 0, 4, 0);
+    part(g, new THREE.ConeGeometry(4.5, 1.3, 8, 1, true), FM.canopy, 0, 7.6, 0); },
+  planter(g){ part(g, Bx(2, 1.8, 2), FM.clay, 0, 0.9, 0); part(g, new THREE.SphereGeometry(0.9, 16, 12), FM.leaf, 0, 2.5, 0); },
+};
+
+// the 3′ swing/stack zone in front of each door
+const DOOR_ZONES = [
+  { label:'kitchen NanaWall', minE:-3, maxE:0, minN:1.7, maxN:11.4, y:0 },
+  { label:'dining NanaWall', minE:1.77, maxE:11.5, minN:-3, maxN:0, y:0 },
+  { label:'mudroom door', minE:-3, maxE:0, minN:32.7, maxN:35.5, y:0 },
+  { label:'office French doors', minE:3.25, maxE:9.25, minN:H.offN, maxN:H.offN + 3, y:0 },
+  { label:'front door', minE:H.mainE, maxE:H.mainE + 3, minN:16.6, maxN:19.6, y:0 },
+  { label:'basement NanaWall', minE:-3, maxE:0, minN:38.67 - 152/12 - 10, maxN:38.67 - 152/12, y:H.baseFloor },
+];
+let deckRects = [], stairZones = [], selectedFurn = null;
+const furnGroup = new THREE.Group(); scene.add(furnGroup);
+const furnObjects = new Map(), furnWarn = new Map();
+function deckAt(E, N){
+  let best = null;
+  deckRects.forEach(r => { if (E >= r.minE - 0.01 && E <= r.maxE + 0.01 && N >= r.minN - 0.01 && N <= r.maxN + 0.01 && (!best || r.y > best.y)) best = r; });
+  return best;
+}
+const surfaceAt = (E, N) => { const r = deckAt(E, N); return r ? r.y : gradeAt(E, N); };
+function furnPoints(it, steps){
+  const spec = FURN[it.type], c = Math.cos(it.rot*Math.PI/180), s = Math.sin(it.rot*Math.PI/180), pts = [];
+  for (let i = 0; i <= steps; i++) for (let j = 0; j <= steps; j++){
+    const a = -spec.w/2 + spec.w*i/steps, b = -spec.d/2 + spec.d*j/steps;
+    pts.push([it.x + a*c - b*s, it.n + a*s + b*c]);
+  }
+  return pts;
+}
+function furnCorners(it){
+  const spec = FURN[it.type], c = Math.cos(it.rot*Math.PI/180), s = Math.sin(it.rot*Math.PI/180);
+  return [[-1,-1],[1,-1],[1,1],[-1,1]].map(([i, j]) => { const a = i*spec.w/2, b = j*spec.d/2; return [it.x + a*c - b*s, it.n + a*s + b*c]; });
+}
+function rectsOverlap(A, B){
+  for (const P of [A, B]) for (let i = 0; i < 4; i++){
+    const p = P[i], q = P[(i+1) % 4], ax = -(q[1]-p[1]), ay = q[0]-p[0];
+    const pa = A.map(v => v[0]*ax + v[1]*ay), pb = B.map(v => v[0]*ax + v[1]*ay);
+    const eps = 0.05 * Math.hypot(ax, ay);
+    if (Math.max(...pa) <= Math.min(...pb) + eps || Math.max(...pb) <= Math.min(...pa) + eps) return false;
+  }
+  return true;
+}
+function furnWarnings(it){
+  const warns = [], pts = furnPoints(it, 4), y = surfaceAt(it.x, it.n), onDeck = !!deckAt(it.x, it.n);
+  if (onDeck && pts.some(p => !deckAt(p[0], p[1]))) warns.push('Hangs off the deck edge');
+  if (pts.some(p => inHouse(p[0], p[1]))) warns.push('Runs into the house');
+  const C = furnCorners(it);
+  if (S.furn.some(o => o !== it && FURN[o.type] && Math.abs(surfaceAt(o.x, o.n) - y) < 1 && rectsOverlap(C, furnCorners(o)))) warns.push('Overlaps another piece');
+  if (stairZones.some(z => pts.some(p => inRect(z.box, p[0], p[1])))) warns.push('Blocks the stairs');
+  DOOR_ZONES.forEach(z => { if (Math.abs(z.y - y) < 2.5 && pts.some(p => inRect(z, p[0], p[1]))) warns.push(`In front of the ${z.label}`); });
+  if (it.type === 'hottub' && onDeck) warns.push('A filled hot tub needs deck framing designed for its weight');
+  return warns;
+}
+function rebuildFurniture(){
+  furnGroup.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material && !sharedMats.has(o.material)) o.material.dispose(); });
+  furnGroup.clear(); furnObjects.clear(); furnWarn.clear();
+  furnGroup.visible = S.furniture;
+  let flagged = 0;
+  S.furn.forEach(it => {
+    const spec = FURN[it.type]; if (!spec) return;
+    const g = new THREE.Group(); BUILD[it.type](g);
+    const warns = furnWarnings(it); furnWarn.set(it.id, warns); if (warns.length) flagged++;
+    const sel = it.id === selectedFurn;
+    if (sel || warns.length || lastView === 'plan'){
+      const fp = new THREE.Mesh(new THREE.PlaneGeometry(spec.w, spec.d), new THREE.MeshBasicMaterial({ color: warns.length ? 0xC4452F : sel ? 0xB5622F : 0x4347A6, transparent:true, opacity: sel ? 0.35 : 0.22, depthWrite:false }));
+      fp.rotation.x = -Math.PI/2; fp.position.y = 0.05; g.add(fp);
+    }
+    g.position.copy(W(it.x, surfaceAt(it.x, it.n), it.n));
+    g.rotation.y = it.rot * Math.PI/180;
+    g.traverse(o => { o.userData.furnId = it.id; });
+    furnGroup.add(g); furnObjects.set(it.id, g);
+  });
+  const n = S.furn.length;
+  $('#furnTotal').textContent = n ? `${n} ${n === 1 ? 'piece' : 'pieces'}${flagged ? ` · ${flagged} with warnings` : ''}` : '';
+  updateFurnbar();
+}
+function updateFurnbar(){
+  const it = S.furn.find(f => f.id === selectedFurn), bar = $('#furnbar');
+  if (!it || !FURN[it.type]){ bar.hidden = true; return; }
+  const spec = FURN[it.type], warns = furnWarn.get(it.id) || [];
+  bar.hidden = false;
+  $('#fbName').textContent = spec.label;
+  $('#fbSize').textContent = `${ftIn(spec.w)} × ${ftIn(spec.d)} · ${Math.round(((it.rot % 360) + 360) % 360)}°`;
+  $('#fbWarn').innerHTML = warns.length ? warns.map(w => `<li>${esc(w)}</li>`).join('') : '<li class="ok">Fits: clear of doors, stairs and deck edges</li>';
+}
+const newFurnId = () => 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+function furnAction(kind){
+  const it = S.furn.find(f => f.id === selectedFurn); if (!it) return;
+  if (kind === 'rot90') it.rot = (it.rot + 90) % 360;
+  if (kind === 'rot15') it.rot = (it.rot + 15) % 360;
+  if (kind === 'dup'){ const c = { ...it, id: newFurnId(), x: it.x + 1.5, n: it.n - 1.5 }; S.furn.push(c); selectedFurn = c.id; }
+  if (kind === 'del'){ S.furn = S.furn.filter(f => f !== it); selectedFurn = null; }
+  rebuildFurniture(); persist();
+}
+function addFurniture(type){
+  const target = S.decks.find(d => d.id === S.selected) || [...S.decks].sort((a, b) => b.len*b.depth - a.len*a.depth)[0];
+  let x = -6, n = -8;
+  if (target){ const r = rectOf(target); x = (r.minE + r.maxE)/2; n = (r.minN + r.maxN)/2; }
+  const k = S.furn.length % 4; x += k * 1.25; n -= k * 1.25;
+  const it = { id: newFurnId(), type, x, n, rot: 0 };
+  S.furn.push(it); selectedFurn = it.id;
+  S.furniture = true; $('#furniture').checked = true;
+  rebuildFurniture(); persist();
+}
+function renderCatalog(){
+  $('#catalog').innerHTML = Object.entries(FURN).map(([k, f]) => `<button type="button" class="cat" data-add="${k}"><span>${esc(f.label)}</span><small>${ftIn(f.w)} × ${ftIn(f.d)}</small></button>`).join('');
+}
+$('#catalog').addEventListener('click', e => { const b = e.target.closest('[data-add]'); if (b) addFurniture(b.dataset.add); });
+$('#fbRot').addEventListener('click', () => furnAction('rot90'));
+$('#fbRot15').addEventListener('click', () => furnAction('rot15'));
+$('#fbDup').addEventListener('click', () => furnAction('dup'));
+$('#fbDel').addEventListener('click', () => furnAction('del'));
+document.addEventListener('keydown', e => {
+  if (!selectedFurn || (e.target instanceof Element && e.target.closest('input, select, textarea, [contenteditable]'))) return;
+  if (e.key === 'r' || e.key === 'R'){ furnAction(e.shiftKey ? 'rot15' : 'rot90'); e.preventDefault(); }
+  else if (e.key === 'd' || e.key === 'D'){ furnAction('dup'); e.preventDefault(); }
+  else if (e.key === 'Delete' || e.key === 'Backspace'){ furnAction('del'); e.preventDefault(); }
+  else if (e.key === 'Escape'){ selectedFurn = null; rebuildFurniture(); }
+});
+
+/* ---------- Saving in this browser, and layout codes for sharing ---------- */
+const LOCAL_KEY = 'deckStudy.v15.current';
+const clone = v => JSON.parse(JSON.stringify(v));
+function persist(){
+  store.set(LOCAL_KEY, { decks: clone(S.decks), furn: clone(S.furn), day:S.day, time:S.time, westDrop:S.westDrop, eastDrop:S.eastDrop, decking:S.decking, railing:S.railing, roof:S.roof, furniture:S.furniture, labels:S.labels });
+}
+const b64u = bytes => { let s = ''; bytes.forEach(b => { s += String.fromCharCode(b); }); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+const unb64u = str => Uint8Array.from(atob(str.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((str.length + 3) % 4)), c => c.charCodeAt(0));
+// A code is "z" + base64url(deflate(JSON)), or "j" + base64url(JSON) where compression isn't available.
+async function encodeLayout(){
+  const raw = new TextEncoder().encode(JSON.stringify({ v:1, decks: clone(S.decks).map(({ id, ...rest }) => rest), furniture: clone(S.furn), decking:S.decking, railing:S.railing }));
+  if (typeof CompressionStream === 'undefined') return 'j' + b64u(raw);
+  const buf = await new Response(new Blob([raw]).stream().pipeThrough(new CompressionStream('deflate-raw'))).arrayBuffer();
+  return 'z' + b64u(new Uint8Array(buf));
+}
+async function decodeLayout(code){
+  code = code.replace(/\s+/g, '');
+  const bytes = unb64u(code.slice(1));
+  let text;
+  if (code[0] === 'z') text = new TextDecoder().decode(await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer());
+  else if (code[0] === 'j') text = new TextDecoder().decode(bytes);
+  else throw new Error('unknown format');
+  const data = JSON.parse(text);
+  if (!Array.isArray(data.decks)) throw new Error('no decks');
+  return data;
+}
+// The claude.ai viewer doesn't pass #/? through to this page, so share links point at the page's own
+// address (the one it runs at inside the viewer), where it can read the code directly.
+const ARTIFACT_URL = 'https://claude.ai/code/artifact/405e9bff-61e5-4b00-98ab-ba4969813275';
+const shareBase = () => {
+  if (!location.protocol.startsWith('http')) return ARTIFACT_URL;
+  const url = new URL(location.href); url.hash = ''; url.searchParams.delete('layout');
+  return url.toString();
+};
+const codeFrom = text => (text.match(/[#&?]layout=([A-Za-z0-9_-]+)/) || [null, /^[zj][A-Za-z0-9_-]+$/.test(text) ? text : null])[1];
+function applyCodeData(data){
+  if (data.decking && DECKING[data.decking]){ S.decking = data.decking; $('#decking').value = S.decking; }
+  if (data.railing && RAILING[data.railing]){ S.railing = data.railing; $('#railing').value = S.railing; }
+  loadLayout({ decks: data.decks, furniture: Array.isArray(data.furniture) ? data.furniture : [] });
+}
+$('#copyCode').addEventListener('click', async () => {
+  const link = `${shareBase()}#layout=${await encodeLayout()}`, out = $('#codeOut');
+  out.value = link; out.hidden = false;
+  try { await navigator.clipboard.writeText(link); $('#codeNote').textContent = 'Link copied'; }
+  catch { out.focus(); out.select(); $('#codeNote').textContent = 'Select the link below and copy it'; }
+});
+$('#loadCode').addEventListener('click', async () => {
+  const code = codeFrom($('#codeIn').value.replace(/\s+/g, ''));
+  try {
+    if (!code) throw new Error('no code');
+    applyCodeData(await decodeLayout(code));
+    $('#codeIn').value = ''; $('#codeNote').textContent = 'Layout loaded';
+  } catch {
+    $('#codeNote').textContent = 'That link didn’t load. Check that it was copied in full';
+  }
+});
+// Opening a share link: load its layout, then take the code back out of the address.
+async function loadFromLink(){
+  const code = codeFrom(location.hash + '&' + location.search);
+  if (!code) return;
+  try { applyCodeData(await decodeLayout(code)); $('#codeNote').textContent = 'Loaded the shared layout'; }
+  catch { $('#codeNote').textContent = 'The shared link’s layout didn’t load'; }
+  try {
+    const url = new URL(location.href); url.hash = ''; url.searchParams.delete('layout');
+    history.replaceState(null, '', url.pathname + url.search);
+  } catch {}
+}
+
+/* ---------- Layouts ---------- */
+function loadLayout(layout){
+  S.decks = withIds(clone(layout.decks));
+  if (Array.isArray(layout.furniture)) S.furn = clone(layout.furniture).map(f => ({ ...f, id: f.id || newFurnId() }));
+  S.selected = null; selectedFurn = null;
+  renderDecks(); rebuild();
+}
+$('#presets').innerHTML = PRESETS.map(p => `<button type="button" class="chip" data-preset="${p.key}">${esc(p.name)}</button>`).join('');
+$('#presets').addEventListener('click', e => { const b = e.target.closest('[data-preset]'); if (b) loadLayout(PRESETS.find(p => p.key === b.dataset.preset)); });
+let armed = -1;
+function renderSaved(){
+  const list = store.get('deckStudy.saved', []);
+  $('#saved').innerHTML = list.map((l, i) => `<span class="chip"><button type="button" class="x load" data-load="${i}">${esc(l.name)}</button><button type="button" class="x" data-rm="${i}" aria-label="Delete ${esc(l.name)}">${armed === i ? 'Delete?' : '×'}</button></span>`).join('');
+}
+$('#saved').addEventListener('click', e => {
+  const list = store.get('deckStudy.saved', []);
+  const ld = e.target.closest('[data-load]'), rm = e.target.closest('[data-rm]');
+  if (ld){ loadLayout(list[+ld.dataset.load]); return; }
+  if (rm){
+    const i = +rm.dataset.rm;
+    if (armed !== i){ armed = i; renderSaved(); return; }
+    armed = -1; list.splice(i, 1); store.set('deckStudy.saved', list); renderSaved();
+  }
+});
+$('#saveBtn').addEventListener('click', () => {
+  const list = store.get('deckStudy.saved', []);
+  const name = $('#saveName').value.trim() || `Layout ${list.length + 1}`;
+  list.push({ name, decks: clone(S.decks).map(({ id, ...rest }) => rest), furniture: clone(S.furn), savedAt: Date.now() });
+  store.set('deckStudy.saved', list); $('#saveName').value = ''; renderSaved();
+});
+
+/* ---------- Sun ---------- */
+function sunPosition(doy, minutes){
+  const year = 2026, date = new Date(year, 0, doy);
+  const dstStart = 67, dstEnd = 305; // Mar 8 – Nov 1, 2026
+  const tz = (doy >= dstStart && doy < dstEnd) ? -6 : -7;
+  const lat = 39.07 * Math.PI/180, lon = -108.55;
+  const hr = minutes / 60;
+  const g = 2*Math.PI/365 * (doy - 1 + (hr - 12)/24);
+  const eqt = 229.18*(0.000075 + 0.001868*Math.cos(g) - 0.032077*Math.sin(g) - 0.014615*Math.cos(2*g) - 0.040849*Math.sin(2*g));
+  const decl = 0.006918 - 0.399912*Math.cos(g) + 0.070257*Math.sin(g) - 0.006758*Math.cos(2*g) + 0.000907*Math.sin(2*g) - 0.002697*Math.cos(3*g) + 0.00148*Math.sin(3*g);
+  const tst = minutes + eqt + 4*lon - 60*tz;
+  const ha = (tst/4 - 180) * Math.PI/180;
+  const cosZ = Math.sin(lat)*Math.sin(decl) + Math.cos(lat)*Math.cos(decl)*Math.cos(ha);
+  const alt = Math.asin(Math.max(-1, Math.min(1, cosZ)));
+  let az = Math.atan2(Math.sin(ha), Math.cos(ha)*Math.sin(lat) - Math.tan(decl)*Math.cos(lat)) + Math.PI;
+  return { alt, az, date, tz };
+}
+const WINDS = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+function updateSun(){
+  const { alt, az, date } = sunPosition(S.day, S.time);
+  const dir = new THREE.Vector3(Math.sin(az)*Math.cos(alt), Math.sin(alt), -Math.cos(az)*Math.cos(alt));
+  sun.position.copy(sun.target.position).addScaledVector(dir, 200);
+  const up = Math.max(0, Math.sin(alt));
+  sun.intensity = 2.8 * Math.min(1, up * 4);
+  sun.color.setHSL(0.09, 0.9 - 0.5*Math.min(1, up*2.5), 0.72 + 0.2*Math.min(1, up*2));
+  hemi.intensity = 0.35 + 0.65 * Math.min(1, up * 3 + 0.15);
+  $('#sundown').hidden = alt > 0;
+  const hh = Math.floor(S.time/60), mm = S.time % 60;
+  $('#dayOut').textContent = date.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+  $('#timeOut').textContent = `${((hh + 11) % 12) + 1}:${String(mm).padStart(2,'0')} ${hh < 12 ? 'AM' : 'PM'}`;
+  const deg = Math.round(alt * 180/Math.PI), azd = (az * 180/Math.PI + 360) % 360;
+  $('#sunRead').textContent = alt > 0 ? `Sun ${deg}° up, from the ${WINDS[Math.round(azd/22.5) % 16]} (${Math.round(azd)}°)` : `Sun is down (${deg}°)`;
+}
+
+/* ---------- Views ---------- */
+let tween = null;
+function goTo(pos, target, ms = 750){
+  const p0 = camera.position.clone(), t0 = controls.target.clone(), start = performance.now();
+  if (reduced) ms = 0;
+  tween = now => {
+    const k = ms ? Math.min(1, (now - start)/ms) : 1;
+    const e = k < .5 ? 2*k*k : 1 - Math.pow(-2*k + 2, 2)/2;
+    camera.position.lerpVectors(p0, pos, e); controls.target.lerpVectors(t0, target, e);
+    if (k >= 1) tween = null;
+  };
+}
+function eye(E, N, dirE, dirN, floorY = 0){
+  const p = W(E, floorY + 5.3, N);
+  return [p, p.clone().add(new THREE.Vector3(dirE, -0.04, -dirN).multiplyScalar(0.6))];
+}
+const VIEWS = {
+  aerial: () => [W(-52, 44, -30), W(12, -3, 30)],
+  plan:   () => [W(14, 175, 34.01), W(14, 0, 34)],
+  kitchen:() => eye(-0.4, 6.5, -1, 0),
+  dining: () => eye(6.6, -0.4, 0, -1),
+  office: () => eye(5.6, H.offN + 0.4, 0, 1),
+  patio:  () => [W(-50, -S.westDrop + 5.3, 24), W(0, -2.5, 24)],
+  front:  () => [W(H.mainE + 95, -S.eastDrop + 5.3, 32), W(H.mainE, 4, 36)],
+  north:  () => [W(16, -S.eastDrop + 5.3, H.bedN + 30), W(16, 3.5, H.offN)],
+  berm:   () => { const g = gradeAt(-36, -24); return [W(-36, g + 5.3, -24), W(4, -1.5, 22)]; },
+};
+function setView(key, instant){
+  const [p, t] = VIEWS[key]();
+  document.querySelectorAll('.views [data-view]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === key)));
+  if (key === 'plan'){ S.roof = false; } else if (!S.roof && lastView === 'plan'){ S.roof = true; }
+  $('#roof').checked = S.roof; roofGroup.visible = S.roof;
+  lastView = key;
+  rebuildFurniture();
+  if (instant){ camera.position.copy(p); controls.target.copy(t); } else goTo(p, t);
+}
+let lastView = 'aerial';
+document.querySelector('.views').addEventListener('click', e => { const b = e.target.closest('[data-view]'); if (b) setView(b.dataset.view); });
+controls.addEventListener('start', () => { tween = null; });
+
+/* ---------- Picking ---------- */
+const ray = new THREE.Raycaster(); let down = null, furnPointer = false, drag = null;
+const ndc = e => { const rect = renderer.domElement.getBoundingClientRect(); return new THREE.Vector2(((e.clientX - rect.left)/rect.width)*2 - 1, -((e.clientY - rect.top)/rect.height)*2 + 1); };
+const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), hitPt = new THREE.Vector3();
+// Capture phase on the wrapper runs before OrbitControls, so grabbing furniture doesn't orbit the camera.
+view.addEventListener('pointerdown', e => {
+  down = [e.clientX, e.clientY]; furnPointer = false;
+  if (e.button !== 0 || !S.furniture) return;
+  ray.setFromCamera(ndc(e), camera);
+  const hit = ray.intersectObjects(furnGroup.children, true)[0];
+  if (!hit) return;
+  const it = S.furn.find(f => f.id === hit.object.userData.furnId); if (!it) return;
+  furnPointer = true; controls.enabled = false;
+  dragPlane.constant = -surfaceAt(it.x, it.n);
+  if (ray.ray.intersectPlane(dragPlane, hitPt)) drag = { it, offE: it.x - hitPt.x, offN: it.n + hitPt.z, moved: false };
+  if (selectedFurn !== it.id){ selectedFurn = it.id; rebuildFurniture(); }
+}, { capture: true });
+window.addEventListener('pointermove', e => {
+  if (!drag) return;
+  ray.setFromCamera(ndc(e), camera);
+  if (!ray.ray.intersectPlane(dragPlane, hitPt)) return;
+  const x = Math.round((hitPt.x + drag.offE) * 4) / 4, n = Math.round((-hitPt.z + drag.offN) * 4) / 4;
+  if (x === drag.it.x && n === drag.it.n) return;
+  drag.it.x = x; drag.it.n = n; drag.moved = true;
+  const g = furnObjects.get(drag.it.id); if (g) g.position.copy(W(x, surfaceAt(x, n), n));
+});
+window.addEventListener('pointerup', () => {
+  if (drag){ const moved = drag.moved; drag = null; if (moved){ rebuildFurniture(); persist(); } }
+  if (furnPointer){ controls.enabled = true; furnPointer = false; }
+});
+renderer.domElement.addEventListener('pointerup', e => {
+  if (furnPointer) return;
+  if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 4) return;
+  ray.setFromCamera(ndc(e), camera);
+  const hit = ray.intersectObjects(pickables, false)[0];
+  if (selectedFurn){ selectedFurn = null; rebuildFurniture(); }
+  select(hit ? hit.object.userData.deckId : null, true);
+});
+
+/* ---------- Controls wiring ---------- */
+function bindRange(id, key, fmt, after){
+  const el = $('#' + id), out = $('#' + id.replace('Drop','Out'));
+  el.value = S[key];
+  const show = () => { if (fmt && out) out.textContent = fmt(S[key]); };
+  show();
+  el.addEventListener('input', () => { S[key] = parseFloat(el.value); show(); after(); });
+}
+bindRange('day', 'day', null, () => { updateSun(); schedule(); });
+bindRange('time', 'time', null, () => { updateSun(); schedule(); });
+bindRange('westDrop', 'westDrop', v => ftIn(v), () => { updateTerrain(); schedule(); });
+bindRange('eastDrop', 'eastDrop', v => ftIn(v), () => { updateTerrain(); schedule(); });
+['decking','railing'].forEach(k => { const el = $('#' + k); el.value = S[k]; el.addEventListener('change', () => { S[k] = el.value; rebuild(); }); });
+['furniture','labels'].forEach(k => { const el = $('#' + k); el.checked = S[k]; el.addEventListener('change', () => { S[k] = el.checked; rebuild(); }); });
+$('#roof').addEventListener('change', e => { S.roof = e.target.checked; roofGroup.visible = S.roof; schedule(); });
+
+/* ---------- Boot ---------- */
+function resize(){
+  const w = view.clientWidth, h = view.clientHeight;
+  renderer.setSize(w, h); labelRenderer.setSize(w, h);
+  camera.aspect = w / Math.max(1, h); camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(view);
+resize();
+renderCatalog();
+updateTerrain(); updateSun(); renderDecks(); rebuild();
+renderSaved();
+loadFromLink();
+roofGroup.visible = S.roof;
+const startView = new URLSearchParams(location.search).get('view');
+setView(VIEWS[startView] ? startView : 'aerial', true);
+
+const needle = $('#needle');
+// Hide labels that sit behind the house from the current camera position.
+const occRay = new THREE.Raycaster(), occDir = new THREE.Vector3(), occPos = new THREE.Vector3();
+let frame = 0;
+function occludeLabels(){
+  const blockers = roofGroup.visible ? [house, roofGroup] : [house];
+  [doorLabels, deckGroup].forEach(g => g.children.forEach(o => {
+    if (!o.isCSS2DObject) return;
+    o.getWorldPosition(occPos);
+    occDir.subVectors(occPos, camera.position);
+    const dist = occDir.length();
+    occRay.set(camera.position, occDir.normalize()); occRay.far = Math.max(0, dist - 0.8);
+    o.element.style.visibility = occRay.intersectObjects(blockers, true).length ? 'hidden' : '';
+  }));
+}
+renderer.setAnimationLoop(now => {
+  if (tween) tween(now);
+  controls.update();
+  if (++frame % 8 === 1) occludeLabels();
+  needle.style.transform = `rotate(${controls.getAzimuthalAngle() * 180/Math.PI}deg)`;
+  renderer.render(scene, camera); labelRenderer.render(scene, camera);
+});
+</script>
+</html>
