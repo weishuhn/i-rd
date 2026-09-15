@@ -236,7 +236,7 @@ details b{color:var(--ink);font-weight:600}
       <h2>Finish &amp; site</h2>
       <div class="toggles">
         <label>Decking<select id="decking">
-          <option value="cedar">Cedar</option>
+          <option value="cedar">Stained wood (matches pergola)</option>
           <option value="gray">Gray composite</option>
           <option value="walnut">Walnut composite</option>
         </select></label>
@@ -592,7 +592,7 @@ const boardTex = canvasTex(256, 256, (g, w, h) => {
   }
 });
 const balTex = canvasTex(32, 8, (g) => { g.clearRect(0,0,32,8); g.fillStyle = '#ffffff'; g.fillRect(13, 0, 6, 8); });
-const DECKING = { cedar:0x8A5634, gray:0x8C877E, walnut:0x5A3D2B };
+const DECKING = { cedar:0x5B3F2C, gray:0x8C877E, walnut:0x4A3122 };  // "cedar" = the pergola/railing stain
 const RAILING = { cable:0x5B3F2C, black:0x232426, white:0xF2F1EC, wood:0x9C6B45 };
 
 /* ---------- Decks ---------- */
