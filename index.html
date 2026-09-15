@@ -481,7 +481,7 @@ function updateTerrain(){
 const house = new THREE.Group(), roofGroup = new THREE.Group(), doorLabels = new THREE.Group();
 scene.add(house, roofGroup, doorLabels);
 house.add(prismXZ([[0,0],[H.mainE,0],[H.mainE,H.mainN],[0,H.mainN]], -1.5, H.wallH, mat.siding));
-house.add(prismXZ([[0,0],[H.mainE,0],[H.mainE,H.mainN],[0,H.mainN]], H.baseFloor, -1.5, mat.foundation));
+house.add(prismXZ([[0,0],[H.mainE,0],[H.mainE,H.mainN],[0,H.mainN]], H.baseFloor, -1.5, mat.siding));  // walkout level is sided red like the main floor
 house.add(prismXZ([[0,H.mainN],[0,H.offN],[H.jogE,H.offN],[H.jogE,H.bedN],[H.bedE,H.bedN],[H.bedE,H.mainN]], -1.5, H.addWall, mat.siding));
 // gable infill
 const ridgeMain = H.wallH + (H.mainE/2) * 3/12;
